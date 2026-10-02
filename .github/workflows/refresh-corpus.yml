@@ -17,6 +17,7 @@ on:
       - "src/embedder.py"
       - "src/loader.py"
       - "src/store.py"
+      - "src/corpus_snapshot.py"
 
 permissions:
   contents: write
@@ -56,16 +57,19 @@ jobs:
         env:
           TOKENIZERS_PARALLELISM: "false"
           ANONYMIZED_TELEMETRY: "false"
-        run: python ingest.py --sources seed_sources.csv --output data/chroma_db/
+        run: |
+          python -m src.corpus_snapshot restore --database data/chroma_db/
+          python ingest.py --sources seed_sources.csv --output data/chroma_db/
+          python -m src.corpus_snapshot export --database data/chroma_db/
 
       - name: Commit refreshed corpus
         run: |
-          if git diff --quiet -- data/chroma_db/chroma.sqlite3 sources.csv; then
+          if git diff --quiet -- data/corpus.json.gz sources.csv; then
             echo "Corpus is unchanged."
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/chroma_db/chroma.sqlite3 sources.csv
+          git add data/corpus.json.gz sources.csv
           git commit -m "Refresh daily source corpus"
           git push origin main

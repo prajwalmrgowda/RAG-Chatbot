@@ -56,7 +56,7 @@ The command returns a nonzero status when the stored corpus is empty or any of t
 The `Refresh corpus` GitHub Actions workflow runs every day at 08:00
 Asia/Kolkata and can also be started manually from the repository's **Actions**
 tab. It refreshes only allowlisted sources, preserves stale indexed data when an
-individual refresh fails, commits `sources.csv` and the deployable Chroma seed,
+individual refresh fails, commits `sources.csv` and `data/corpus.json.gz`,
 and triggers Streamlit's normal redeploy from `main`. Ingestion does not use the
 Groq API key.
 
@@ -109,9 +109,17 @@ The UI includes the five supported schemes, the exact `Facts-only. No investment
 
 ## Deploy on Streamlit Community Cloud
 
-The repository includes the validated 314-chunk Chroma corpus as a deployment
-seed, so a Streamlit cold start does not scrape external sources or rebuild the
-index. The large human-readable embedding export remains a local ignored file.
+The repository includes `data/corpus.json.gz`, a portable snapshot of chunks,
+metadata, and their precomputed embeddings. Streamlit builds a fresh local Chroma
+index from this snapshot on cold start. It does not scrape sources or recompute
+document embeddings. The cached service is keyed by snapshot contents so a daily
+update creates a new index instead of replacing files used by an open client.
+
+Chroma's internal SQLite and HNSW files must stay together; copying SQLite alone
+can produce `Error finding id`. Runtime databases and the large human-readable
+embedding export are ignored by Git. The daily workflow restores the portable
+snapshot, refreshes sources, and verifies a round-trip vector query for every
+source before publishing the next snapshot.
 
 1. Open Streamlit Community Cloud and create an app from this GitHub repository.
 2. Select branch `main` and entry point `streamlit_app.py`.

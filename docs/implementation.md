@@ -79,7 +79,7 @@ citation, and source-date rendering.
 - Add `src/models.py` for shared typed contracts: document, chunk, retrieval hit, classification result, and chat response. The response exposes `answer`, `source_url`, `last_updated`, and `is_refusal`; represent operational errors separately.
 - Define classifier outcomes such as factual, advice, performance, PII, out-of-scope, and needs-clarification. Retrieval hits retain text, chunk ID, metadata, and distance/score semantics.
 - Create `seed_sources.csv` with columns `url,title,scheme` using the five exact URLs in PRD §4.1. Reserve explicit entries for verified official follow-on sources in Phase 2.
-- Ignore virtual environments, caches, model files, embedding text exports, and transient logs. Keep seed/report CSVs, documentation, and the validated read-only Streamlit Chroma seed versioned.
+- Ignore virtual environments, caches, model files, embedding text exports, and transient logs. Keep seed/report CSVs, documentation, and the validated portable Streamlit corpus snapshot versioned.
 
 ### Completion checks
 
@@ -247,7 +247,7 @@ citation, and source-date rendering.
 - Create `sample_qa.md` with 5–10 actual observed answers, citations, source ingestion dates, and refusals. Include relevant missing-fact behavior if corpus coverage remains incomplete.
 - Finish README: environment creation, validated dependency installation, Groq API-key setup, initial embedding download, seed source format, ingestion/run commands, reset semantics, approved fallbacks, chunking strategy, privacy behavior, tests, and known limits.
 - Document actual local resource needs and API usage rather than treating architecture estimates as verified requirements. Explain that model downloads, source refreshes, and Groq generation require network access.
-- Verify a clean setup using the documented commands and preserve an accurate generated source report. Version only the validated Chroma seed required by Streamlit deployment; do not commit model caches or the large text embedding export.
+- Verify a clean setup using the documented commands and preserve an accurate generated source report. Version only the validated portable corpus snapshot required by Streamlit deployment; do not commit model caches or the large text embedding export.
 
 ### Final acceptance checklist
 

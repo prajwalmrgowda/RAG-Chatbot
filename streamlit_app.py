@@ -4,13 +4,15 @@ from __future__ import annotations
 
 import html
 import os
+import tempfile
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit
 
 import streamlit as st
 
-from src.config import CHROMA_PATH, DEFAULT_TOP_K, SUPPORTED_SCHEMES
+from src.config import DEFAULT_TOP_K, SUPPORTED_SCHEMES
+from src.corpus_snapshot import SNAPSHOT_PATH, restore_snapshot
 from src.models import ChatResponse, OperationalError
 from src.service import ApplicationService
 
@@ -43,10 +45,18 @@ def _load_streamlit_secrets() -> None:
             os.environ[name] = str(value)
 
 
-@st.cache_resource(show_spinner="Loading the retrieval index…")
 def get_service() -> ApplicationService:
     _load_streamlit_secrets()
-    return ApplicationService(CHROMA_PATH, top_k=DEFAULT_TOP_K)
+    return _service_from_snapshot(SNAPSHOT_PATH.read_bytes())
+
+
+@st.cache_resource(show_spinner="Loading the retrieval index…", max_entries=2)
+def _service_from_snapshot(snapshot: bytes) -> ApplicationService:
+    # Snapshot bytes are the cache key. Updates never replace an open database
+    # or reuse stale HNSW files from a previous deployment.
+    directory = Path(tempfile.mkdtemp(prefix="fund-facts-corpus-"))
+    restore_snapshot(snapshot, directory)
+    return ApplicationService(directory, top_k=DEFAULT_TOP_K)
 
 
 def response_to_message(response: ChatResponse | OperationalError) -> dict[str, Any]:

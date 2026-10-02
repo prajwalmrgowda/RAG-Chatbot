@@ -18,6 +18,7 @@ models/
 *.bin
 
 # Generated vector data and transient output
+data/chroma_db/
 data/chunks_and_embeddings.txt
 *.log
 logs/
