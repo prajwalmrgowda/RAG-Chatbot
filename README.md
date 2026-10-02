@@ -53,6 +53,13 @@ Add `--reset` to deliberately delete and rebuild the `hdfc_schemes` collection. 
 
 The command returns a nonzero status when the stored corpus is empty or any of the five required scheme pages is absent. A failed optional source is reported as a partial refresh but does not invalidate complete five-scheme coverage. Source fetching and the first embedding-model download require network access.
 
+The `Refresh corpus` GitHub Actions workflow runs every day at 08:00
+Asia/Kolkata and can also be started manually from the repository's **Actions**
+tab. It refreshes only allowlisted sources, preserves stale indexed data when an
+individual refresh fails, commits `sources.csv` and the deployable Chroma seed,
+and triggers Streamlit's normal redeploy from `main`. Ingestion does not use the
+Groq API key.
+
 The loader accepts only URLs and metadata declared in both `seed_sources.csv` and `src/config.py`. Redirect destinations receive the same check. The current source roles are:
 
 | Sources | Role |
