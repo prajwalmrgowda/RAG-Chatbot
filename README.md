@@ -2,7 +2,7 @@
 
 A local, single-user RAG chatbot that answers factual questions about five HDFC Mutual Fund direct-growth schemes. It is designed to return short, source-linked answers and refuse investment advice, performance comparisons, and messages containing personal identifiers.
 
-The project implements all eight phases from `docs/implementation.md`, using `docs/architecture.md` and `docs/PRD.md` as its design and product references. It includes allowlisted ingestion, local embeddings, persistent Chroma storage, deterministic guardrails, single-source retrieval, grounded Groq generation, and a local Gradio UI.
+The project implements all eight phases from `docs/implementation.md`, using `docs/architecture.md` and `docs/PRD.md` as its design and product references. It includes allowlisted ingestion, local embeddings, persistent Chroma storage, deterministic guardrails, single-source retrieval, grounded Groq generation, a local Gradio UI, and a Streamlit Community Cloud entry point.
 
 ## Requirements
 
@@ -100,6 +100,29 @@ The application will bind to `127.0.0.1` by default and use the existing local C
 
 The UI includes the five supported schemes, the exact `Facts-only. No investment advice.` disclaimer, and three clickable example questions. Groq requests use Chat Completions without tools or conversation state.
 
+## Deploy on Streamlit Community Cloud
+
+The repository includes the validated 314-chunk Chroma corpus as a deployment
+seed, so a Streamlit cold start does not scrape external sources or rebuild the
+index. The large human-readable embedding export remains a local ignored file.
+
+1. Open Streamlit Community Cloud and create an app from this GitHub repository.
+2. Select branch `main` and entry point `streamlit_app.py`.
+3. In **Advanced settings → Secrets**, add:
+
+   ```toml
+   GROQ_API_KEY = "your-groq-key"
+   GROQ_MODEL = "openai/gpt-oss-20b"
+   ```
+
+4. Select Python 3.11 and deploy.
+
+For local Streamlit testing, run:
+
+```bash
+streamlit run streamlit_app.py
+```
+
 ## Current configuration
 
 - Embeddings: `sentence-transformers/all-MiniLM-L6-v2`, fixed at revision `c9745ed1d9f207416be6d2e6f8de32d1f16199bf` (384 dimensions)
@@ -109,7 +132,7 @@ The UI includes the five supported schemes, the exact `Facts-only. No investment
 - Generated context: one source, maximum 2,400 characters
 - Chunk target: 400–600 characters with 64-character overlap
 - Generation: Groq Chat Completions with `openai/gpt-oss-20b` and temperature 0.1
-- UI: local Gradio on `127.0.0.1:7860`
+- UI: local Gradio on `127.0.0.1:7860`; hosted Streamlit entry point in `streamlit_app.py`
 
 The five supported schemes and their aliases are defined once in `src/config.py`. HDFC Equity Fund is treated as an alias for HDFC Flexi Cap Fund while retaining the direct-growth plan name.
 

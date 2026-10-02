@@ -333,7 +333,7 @@ print(response.last_updated) # "2026-10-01"
 │           User's Laptop              │
 │                                      │
 │  ┌────────────┐    ┌──────────────┐ │
-│  │  Browser   │───→│  Gradio UI   │ │
+│  │  Browser   │───→│ Gradio/Streamlit│ │
 │  │  :7860     │    │  chat.py     │ │
 │  └────────────┘    └──────┬───────┘ │
 │                    ┌──────▼───────┐  │

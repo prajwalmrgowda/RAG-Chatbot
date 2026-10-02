@@ -29,7 +29,7 @@ These decisions resolve ambiguities in the draft architecture for the build. Kee
 
 | Topic | Decision for implementation |
 | --- | --- |
-| UI framework | Use Gradio, matching the `python chat.py --port 7860` entry point. |
+| UI framework | Keep Gradio for the local `python chat.py --port 7860` entry point and use `streamlit_app.py` for Streamlit Community Cloud hosting. Both call the same application service. |
 | Storage path | Use `data/chroma_db/` throughout. Treat `./chroma_db/` elsewhere in the architecture as an inconsistent example. |
 | Corpus inputs and outputs | `seed_sources.csv` is the versioned input. `sources.csv` is the generated ingestion report. Never overwrite the seed file with runtime status. |
 | Reset behavior | Follow the explicit CLI contract in architecture §8.1: `--reset` defaults to false. Normal ingestion replaces chunks for successfully refreshed URLs without duplicating them; `--reset` deliberately rebuilds the collection. This overrides the prose suggesting rebuild by default. |
@@ -72,14 +72,14 @@ citation, and source-date rendering.
 ### Implementation tasks
 
 - Create `requirements.txt`, `.gitignore`, `src/__init__.py`, `src/config.py`, and a minimal `README.md` with setup instructions.
-- Use Python 3.11+. Choose compatible dependency versions for Gradio, httpx, BeautifulSoup4, sentence-transformers, ChromaDB, and pytest; pin the versions actually validated during the build rather than blindly using `latest`.
+- Use Python 3.11+. Choose compatible dependency versions for Gradio, Streamlit, httpx, BeautifulSoup4, sentence-transformers, ChromaDB, and pytest; pin the versions actually validated during the build rather than blindly using `latest`.
 - Configure the embedding model `sentence-transformers/all-MiniLM-L6-v2`, a fixed model revision, dimension 384, collection `hdfc_schemes`, storage `data/chroma_db/`, top-k 4, chunk target 400–600 characters, and overlap 50–80 characters.
 - Configure Groq model `openai/gpt-oss-20b`, base URL `https://api.groq.com/openai/v1`, `GROQ_API_KEY`, temperature 0.1, bounded output/timeouts, and port 7860. Bind the demo UI to localhost by default.
 - Define the five canonical scheme names and aliases, including HDFC Equity Fund as an alias for HDFC Flexi Cap Fund. Preserve the direct-growth plan distinction.
 - Add `src/models.py` for shared typed contracts: document, chunk, retrieval hit, classification result, and chat response. The response exposes `answer`, `source_url`, `last_updated`, and `is_refusal`; represent operational errors separately.
 - Define classifier outcomes such as factual, advice, performance, PII, out-of-scope, and needs-clarification. Retrieval hits retain text, chunk ID, metadata, and distance/score semantics.
 - Create `seed_sources.csv` with columns `url,title,scheme` using the five exact URLs in PRD §4.1. Reserve explicit entries for verified official follow-on sources in Phase 2.
-- Ignore virtual environments, caches, model files, `data/chroma_db/`, and transient logs. Keep seed/report CSVs and documentation versioned.
+- Ignore virtual environments, caches, model files, embedding text exports, and transient logs. Keep seed/report CSVs, documentation, and the validated read-only Streamlit Chroma seed versioned.
 
 ### Completion checks
 
@@ -207,11 +207,11 @@ citation, and source-date rendering.
 - All valid factual outputs have at most three body sentences, exactly one rendered citation, and the correct source date.
 - Live Groq API answers for supported sample questions can be checked against the actual retrieved text; fixture tests and live-API checks are reported separately.
 
-## Phase 7 — Application orchestration and Gradio UI
+## Phase 7 — Application orchestration and chat UIs
 
 **References:** Architecture §§6, 8.2, 9, 10; PRD §5.4.
 
-**Files:** `src/service.py`, `chat.py`, `tests/test_service.py`.
+**Files:** `src/service.py`, `chat.py`, `streamlit_app.py`, `tests/test_service.py`, `tests/test_streamlit_app.py`.
 
 ### Implementation tasks
 
@@ -247,7 +247,7 @@ citation, and source-date rendering.
 - Create `sample_qa.md` with 5–10 actual observed answers, citations, source ingestion dates, and refusals. Include relevant missing-fact behavior if corpus coverage remains incomplete.
 - Finish README: environment creation, validated dependency installation, Groq API-key setup, initial embedding download, seed source format, ingestion/run commands, reset semantics, approved fallbacks, chunking strategy, privacy behavior, tests, and known limits.
 - Document actual local resource needs and API usage rather than treating architecture estimates as verified requirements. Explain that model downloads, source refreshes, and Groq generation require network access.
-- Verify a clean setup using the documented commands and preserve an accurate generated source report. Do not commit the vector database or model caches.
+- Verify a clean setup using the documented commands and preserve an accurate generated source report. Version only the validated Chroma seed required by Streamlit deployment; do not commit model caches or the large text embedding export.
 
 ### Final acceptance checklist
 
