@@ -1,0 +1,9 @@
+# Runtime dependencies. These versions support the project's Python 3.11 baseline.
+gradio==6.29.0
+httpx==0.28.1
+beautifulsoup4==4.15.0
+sentence-transformers==6.1.0
+chromadb==1.5.9
+
+# Test dependency.
+pytest==9.1.1
