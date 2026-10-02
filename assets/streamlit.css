@@ -1,0 +1,91 @@
+/* Static presentation only. Keep native Streamlit controls and keyboard navigation. */
+.stApp { color: #182b36; }
+[data-testid="stMainBlockContainer"] {
+    max-width: 1060px; padding: 3rem 3rem 2rem;
+}
+[data-testid="stHeader"] { background: #f8faf9ed; }
+[data-testid="stSidebar"] { background: #142e3b; color: #ecf3f4; }
+[data-testid="stSidebarContent"] { padding-top: 1.2rem; }
+.brand { display: flex; align-items: center; gap: .85rem; margin: .5rem 0 2.2rem;
+    font-size: 1.35rem; font-weight: 650; letter-spacing: -.03em; }
+.brand-mark { width: 42px; height: 42px; display: grid; place-items: center;
+    border: 1px solid #73988d; border-radius: 12px; background: #204839;
+    color: #dcf0db; font: italic 700 30px Georgia, serif; letter-spacing: -.13em; padding-right: 4px; }
+.brand-subtitle { display: block; font-size: .58rem; letter-spacing: .14em;
+    color: #a2b9c2; font-weight: 500; margin-top: .3rem; }
+[data-testid="stSidebar"] .stButton button {
+    background: #24424f; border: 1px solid #52707c; border-radius: 10px; color: #edf5f6;
+    min-height: 45px;
+}
+[data-testid="stSidebar"] .stButton button:hover:not(:disabled) { background: #315665; border-color: #bdd2d4; }
+[data-testid="stSidebar"] .stButton button:disabled { opacity: .55; }
+.sidebar-label { margin: 1.9rem 0 .55rem; font-size: .62rem; letter-spacing: .16em; color: #a4bfc9; }
+.scheme-row { display: flex; gap: .8rem; align-items: flex-start;
+    padding: .85rem 0; border-bottom: 1px solid #294754; font-size: .85rem; }
+.scheme-number { font: 11px ui-monospace, monospace; color: #8baab4; padding-top: 4px; }
+.scheme-row small { display: block; color: #a4bfc9; font-size: .69rem; margin-top: .2rem; }
+.sidebar-note { border-top: 1px solid #36515c; margin-top: 2.3rem; padding-top: 1.3rem; }
+.sidebar-note strong { font-size: .83rem; font-weight: 500; }
+.sidebar-note p { font-size: .77rem; color: #afc5cd; line-height: 1.7; margin: .5rem 0 1.2rem; }
+.sidebar-note span { font-size: .65rem; color: #a4bfc9; }
+.topline { display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+    border-bottom: 1px solid #dfe7e3; padding-bottom: 1.25rem; }
+.topline > span:first-child { font-size: .66rem; font-weight: 600; letter-spacing: .11em; }
+.facts-badge { background: #e9f2eb; color: #266447; border: 1px solid #d5e7da;
+    font-size: .65rem; border-radius: 30px; padding: .35rem .65rem; white-space: nowrap; }
+.hero { padding: 2.7rem 0 .8rem; }
+.eyebrow { color: #477363; font-size: .65rem; font-weight: 600; letter-spacing: .14em; margin-bottom: 1rem; }
+.hero h1 { font-size: clamp(2.65rem, 4.6vw, 4rem); font-weight: 600; letter-spacing: -.055em;
+    line-height: 1.13; padding: 0; margin: 0 0 1.1rem; color: #183441; }
+.hero h1 em { font-family: Georgia, "Times New Roman", serif; color: #20745d; font-weight: 400; }
+.hero p { max-width: 520px; color: #586d76; font-size: .96rem; line-height: 1.8; margin: 0; }
+.disclaimer { display: flex; gap: .5rem; align-items: center; font-size: .74rem;
+    color: #50655e; padding: .5rem 0 1rem; }
+.disclaimer > span { color: #32745e; }
+.section-label { font-size: .64rem; font-weight: 600; letter-spacing: .13em;
+    color: #687b83; margin: 1rem 0 .4rem; }
+.st-key-prompt_card_01, .st-key-prompt_card_02, .st-key-prompt_card_03 {
+    background: #fff; border-color: #dce5e1; border-radius: 14px;
+    box-shadow: 0 3px 12px #142e3b04; height: 100%;
+}
+.example-meta { display: flex; align-items: center; gap: .6rem; color: #61766f; font-size: .64rem; }
+.example-meta > span { background: #edf4ef; color: #37755b; border-radius: 6px;
+    padding: .25rem .4rem; font-family: ui-monospace, monospace; }
+.example-title { margin: .85rem 0 .05rem; font-weight: 600; font-size: .87rem; letter-spacing: -.025em; }
+.st-key-example_cards .stButton button { border: 0; border-radius: 6px; padding: .3rem 0;
+    background: transparent; color: #48685d; text-align: left; justify-content: flex-start; min-height: 75px; }
+.st-key-example_cards .stButton button p { font-size: .78rem; line-height: 1.65; }
+.st-key-example_cards .stButton button:hover { color: #125a42; background: #f1f7f3; }
+.st-key-example_cards .stButton button::after { content: "↗"; padding-left: .3rem; font-size: 1rem; }
+.how-it-works { display: flex; justify-content: space-between; flex-wrap: wrap; gap: .8rem;
+    border-top: 1px solid #dfe7e3; padding: 1.5rem 0 1rem; margin: 1.9rem 0 .7rem;
+    font-size: .72rem; color: #60757e; }
+.how-it-works b { font: .65rem ui-monospace, monospace; color: #37795e; margin-right: .4rem; }
+.conversation-title { font-size: 1.75rem; letter-spacing: -.04em; margin: 1.6rem 0 .4rem; padding: 0; }
+[data-testid="stChatMessage"] { border: 1px solid #dce5e1; border-radius: 16px;
+    background: #fff; padding: 1.35rem; margin: .4rem 0; }
+[data-testid="stChatMessage"]:has([data-testid="stChatMessageAvatarUser"]) { background: #edf3f0; border-color: #e1eae5; }
+.message-label { font-size: .59rem; font-weight: 650; letter-spacing: .15em; color: #687c84; margin-bottom: .55rem; }
+.answer-body { font-size: .96rem; line-height: 1.85; white-space: pre-wrap; overflow-wrap: anywhere; }
+.source-footer { border-top: 1px solid #e6ece9; margin-top: 1.1rem; padding-top: .8rem;
+    display: flex; flex-wrap: wrap; gap: .6rem 1rem; align-items: center; justify-content: space-between; }
+.source-footer a { color: #216b51 !important; font-size: .75rem; text-decoration: none; font-weight: 600; }
+.source-footer a:hover { text-decoration: underline; }
+.source-date { color: #62766f; font-size: .65rem; }
+[data-testid="stChatInput"] { border: 1px solid #bdcfc5; border-radius: 16px;
+    background: #fff; box-shadow: 0 4px 18px #142e3b08; }
+[data-testid="stChatInput"]:focus-within { border-color: #20745d; box-shadow: 0 0 0 2px #20745d20; }
+[data-testid="stCaptionContainer"] { color: #61736d; }
+button:focus-visible, a:focus-visible { outline: 3px solid #3b9677 !important; outline-offset: 3px; }
+@media (max-width: 700px) {
+    [data-testid="stMainBlockContainer"] { padding: 2rem 1.2rem 1.2rem; }
+    .topline { flex-wrap: wrap; gap: .65rem; }
+    .hero { padding-top: 1.7rem; }
+    .hero h1 { font-size: 2.7rem; }
+    .hero p { font-size: .88rem; }
+    .st-key-example_cards [data-testid="stHorizontalBlock"] { flex-direction: column; }
+    .st-key-example_cards [data-testid="stColumn"] { width: 100% !important; flex: 1 1 100% !important; min-width: 0; }
+    .st-key-example_cards .stButton button { min-height: 44px; }
+    .how-it-works { margin-top: 1rem; flex-direction: column; }
+    [data-testid="stChatMessage"] { padding: 1rem; }
+}

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import html
 import os
+from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit
 
@@ -20,6 +21,12 @@ EXAMPLES = (
     "What is the lock-in period for HDFC ELSS Tax Saver Fund?",
     "What is the minimum SIP for HDFC Small Cap Fund?",
 )
+EXAMPLE_TOPICS = (
+    ("01", "Understand the costs", "Expense ratio"),
+    ("02", "Know the holding period", "ELSS lock-in"),
+    ("03", "Plan your first SIP", "Minimum investment"),
+)
+ASSETS = Path(__file__).resolve().parent / "assets"
 
 
 def _load_streamlit_secrets() -> None:
@@ -65,16 +72,26 @@ def render_assistant_message(message: dict[str, Any]) -> None:
         st.caption(message["recovery"])
         return
 
-    st.write(message["answer"])
+    # Render retrieved/generated text literally, never as executable HTML or links.
+    st.markdown(
+        f'<div class="answer-body">{html.escape(message["answer"])}</div>',
+        unsafe_allow_html=True,
+    )
     source_url = message.get("source_url")
     last_updated = message.get("last_updated")
-    if source_url:
+    if source_url and last_updated:
         parts = urlsplit(source_url)
         if parts.scheme in {"http", "https"} and parts.netloc:
             safe_url = html.escape(source_url, quote=True)
-            st.markdown(f"[Source]({safe_url})")
-    if last_updated:
-        st.caption(f"Last updated from sources: {last_updated}")
+            hostname = html.escape(parts.hostname or "Source")
+            st.markdown(
+                '<div class="source-footer">'
+                f'<a href="{safe_url}" target="_blank" rel="noopener noreferrer">'
+                f'View source · {hostname} <span aria-hidden="true">↗</span></a>'
+                '<span class="source-date">Last updated from sources: '
+                f'{html.escape(last_updated)}</span></div>',
+                unsafe_allow_html=True,
+            )
 
 
 def process_question(question: str, service: ApplicationService) -> None:
@@ -86,43 +103,124 @@ def process_question(question: str, service: ApplicationService) -> None:
     )
 
 
+def render_sidebar() -> None:
+    with st.sidebar:
+        st.markdown(
+            '<div class="brand"><span class="brand-mark">ff</span>'
+            '<div>Fund facts<span class="brand-subtitle">HDFC SCHEME EXPLORER</span></div></div>',
+            unsafe_allow_html=True,
+        )
+        st.button(
+            "New conversation", icon=":material/add:", width="stretch",
+            key="new_conversation", disabled=not st.session_state.messages,
+            on_click=lambda: st.session_state.update(messages=[]),
+        )
+        st.markdown('<div class="sidebar-label">YOUR FUND DIRECTORY</div>', unsafe_allow_html=True)
+        for index, scheme in enumerate(SUPPORTED_SCHEMES, 1):
+            name = scheme.canonical_name.removeprefix("HDFC ")
+            name = name.replace(" Direct Plan Growth", "").replace(" Direct Growth", "")
+            name = name.replace(" (HDFC Equity Fund)", "")
+            st.markdown(
+                f'<div class="scheme-row"><span class="scheme-number">0{index}</span>'
+                f'<div>{html.escape(name)}<small>Direct · Growth</small></div></div>',
+                unsafe_allow_html=True,
+            )
+        st.markdown(
+            '<div class="sidebar-note"><strong>A little clarity goes a long way.</strong>'
+            '<p>Explore fees, SIP minimums, lock-in periods, risk levels, and more.</p>'
+            '<span>Independent project. Not affiliated with HDFC.</span></div>',
+            unsafe_allow_html=True,
+        )
+
+
+def render_examples() -> str | None:
+    selected = None
+    with st.container(key="example_cards"):
+        for column, question, (number, title, topic) in zip(
+            st.columns(3, gap="small"), EXAMPLES, EXAMPLE_TOPICS
+        ):
+            with column, st.container(border=True, key=f"prompt_card_{number}"):
+                st.markdown(
+                    f'<div class="example-meta"><span>{number}</span>{topic}</div>'
+                    f'<div class="example-title">{title}</div>',
+                    unsafe_allow_html=True,
+                )
+                if st.button(question, key=f"example_{number}", width="stretch"):
+                    selected = question
+    return selected
+
+
 def main() -> None:
     st.set_page_config(
         page_title="HDFC Mutual Fund Facts Assistant",
-        page_icon="📚",
+        page_icon=":material/menu_book:",
         layout="centered",
     )
-    st.title("HDFC Mutual Fund Facts Assistant")
-    st.info(DISCLAIMER)
-
-    with st.sidebar:
-        st.subheader("Supported schemes")
-        for scheme in SUPPORTED_SCHEMES:
-            st.markdown(f"- {scheme.canonical_name}")
-        st.caption("Answers use indexed public sources and show their ingest date.")
-
-    service = get_service()
+    st.markdown(f'<style>{(ASSETS / "streamlit.css").read_text()}</style>', unsafe_allow_html=True)
     if "messages" not in st.session_state:
         st.session_state.messages = []
-
-    st.markdown("**Try an example:**")
-    columns = st.columns(len(EXAMPLES))
-    selected: str | None = None
-    for column, example in zip(columns, EXAMPLES):
-        if column.button(example, use_container_width=True):
-            selected = example
+    render_sidebar()
+    st.markdown(
+        '<div class="topline"><span>HDFC MUTUAL FUND FACTS ASSISTANT</span>'
+        '<span class="facts-badge">Source-backed answers</span></div>',
+        unsafe_allow_html=True,
+    )
+    if not st.session_state.messages:
+        st.markdown(
+            '<section class="hero"><div class="eyebrow">LESS SEARCHING. MORE CLARITY.</div>'
+            '<h1>Know your funds.<br><em>Find the facts.</em></h1>'
+            '<p>Clear answers to your questions about five HDFC mutual fund schemes, '
+            'with the sources to explore further.</p></section>',
+            unsafe_allow_html=True,
+        )
+    else:
+        st.markdown('<h1 class="conversation-title">Your fund questions, answered.</h1>', unsafe_allow_html=True)
+    st.markdown(
+        f'<div class="disclaimer"><span aria-hidden="true">ⓘ</span> {DISCLAIMER}</div>',
+        unsafe_allow_html=True,
+    )
+    if not st.session_state.messages:
+        st.markdown('<div class="section-label">A GOOD PLACE TO START</div>', unsafe_allow_html=True)
+        selected = render_examples()
+        st.markdown(
+            '<div class="how-it-works"><span><b>01</b> Ask a fund question</span>'
+            '<span><b>02</b> Get a concise answer</span>'
+            '<span><b>03</b> Explore the source</span></div>',
+            unsafe_allow_html=True,
+        )
+    else:
+        with st.expander("Explore suggested questions"):
+            selected = render_examples()
 
     for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
+        avatar = ":material/person:" if message["role"] == "user" else ":material/menu_book:"
+        with st.chat_message(message["role"], avatar=avatar):
             if message["role"] == "user":
-                st.write(message["content"])
+                st.markdown('<div class="message-label">YOU</div>', unsafe_allow_html=True)
+                st.markdown(
+                    f'<div class="answer-body">{html.escape(message["content"])}</div>',
+                    unsafe_allow_html=True,
+                )
             else:
+                st.markdown('<div class="message-label">FUND FACTS</div>', unsafe_allow_html=True)
                 render_assistant_message(message["response"])
 
-    question = st.chat_input("Ask a factual question about a supported scheme")
+    st.caption("Include the fund name in your question. Please leave out personal or account details.")
+    input_options = {
+        "placeholder": "Ask about a fund’s fees, SIP, lock-in, or risk…",
+        "max_chars": 1500,
+        "key": "fund_question",
+    }
+    if st.session_state.messages:
+        question = st.chat_input(**input_options)
+    else:
+        # An inline welcome input avoids scrolling past the introduction on phones.
+        with st.container(key="welcome_input"):
+            question = st.chat_input(**input_options)
     submitted = question or selected
-    if submitted:
-        process_question(submitted.strip(), service)
+    if submitted and submitted.strip():
+        with st.spinner("Looking through the sources…"):
+            process_question(submitted.strip(), get_service())
         st.rerun()
 
 
