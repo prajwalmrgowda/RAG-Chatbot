@@ -5,6 +5,18 @@ on:
     # GitHub cron uses UTC. This runs daily at 08:00 Asia/Kolkata.
     - cron: "30 2 * * *"
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/refresh-corpus.yml"
+      - "requirements-ingest.txt"
+      - "seed_sources.csv"
+      - "ingest.py"
+      - "src/chunker.py"
+      - "src/config.py"
+      - "src/embedder.py"
+      - "src/loader.py"
+      - "src/store.py"
 
 permissions:
   contents: write
