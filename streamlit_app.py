@@ -24,9 +24,9 @@ EXAMPLES = (
     "What is the minimum SIP for HDFC Small Cap Fund?",
 )
 EXAMPLE_TOPICS = (
-    ("01", "Understand the costs", "Expense ratio"),
-    ("02", "Know the holding period", "ELSS lock-in"),
-    ("03", "Plan your first SIP", "Minimum investment"),
+    ("01", "Fees & expenses", "Expense ratio"),
+    ("02", "Lock-in period", "ELSS lock-in"),
+    ("03", "SIP minimums", "Minimum investment"),
 )
 ASSETS = Path(__file__).resolve().parent / "assets"
 
@@ -116,8 +116,8 @@ def process_question(question: str, service: ApplicationService) -> None:
 def render_sidebar() -> None:
     with st.sidebar:
         st.markdown(
-            '<div class="brand"><span class="brand-mark">ff</span>'
-            '<div>Fund facts<span class="brand-subtitle">HDFC SCHEME EXPLORER</span></div></div>',
+            '<div class="brand"><span class="brand-mark" aria-hidden="true">F<span></span></span>'
+            '<div>Fund facts<span class="brand-subtitle">MUTUAL FUND RESEARCH</span></div></div>',
             unsafe_allow_html=True,
         )
         st.button(
@@ -125,7 +125,7 @@ def render_sidebar() -> None:
             key="new_conversation", disabled=not st.session_state.messages,
             on_click=lambda: st.session_state.update(messages=[]),
         )
-        st.markdown('<div class="sidebar-label">YOUR FUND DIRECTORY</div>', unsafe_allow_html=True)
+        st.markdown('<div class="sidebar-label">AVAILABLE FUNDS</div>', unsafe_allow_html=True)
         for index, scheme in enumerate(SUPPORTED_SCHEMES, 1):
             name = scheme.canonical_name.removeprefix("HDFC ")
             name = name.replace(" Direct Plan Growth", "").replace(" Direct Growth", "")
@@ -136,8 +136,8 @@ def render_sidebar() -> None:
                 unsafe_allow_html=True,
             )
         st.markdown(
-            '<div class="sidebar-note"><strong>A little clarity goes a long way.</strong>'
-            '<p>Explore fees, SIP minimums, lock-in periods, risk levels, and more.</p>'
+            '<div class="sidebar-note"><strong>Research with context.</strong>'
+            '<p>Check cited sources and their update dates alongside fund facts.</p>'
             '<span>Independent project. Not affiliated with HDFC.</span></div>',
             unsafe_allow_html=True,
         )
@@ -151,7 +151,7 @@ def render_examples() -> str | None:
         ):
             with column, st.container(border=True, key=f"prompt_card_{number}"):
                 st.markdown(
-                    f'<div class="example-meta"><span>{number}</span>{topic}</div>'
+                    f'<div class="example-meta">{topic}</div>'
                     f'<div class="example-title">{title}</div>',
                     unsafe_allow_html=True,
                 )
@@ -171,33 +171,37 @@ def main() -> None:
         st.session_state.messages = []
     render_sidebar()
     st.markdown(
-        '<div class="topline"><span>HDFC MUTUAL FUND FACTS ASSISTANT</span>'
-        '<span class="facts-badge">Source-backed answers</span></div>',
+        '<div class="topline"><span>Research workspace <span class="topline-divider">/</span> <strong>HDFC mutual funds</strong></span>'
+        '<span class="facts-badge">Sources included</span></div>',
         unsafe_allow_html=True,
     )
     if not st.session_state.messages:
         st.markdown(
-            '<section class="hero"><div class="eyebrow">LESS SEARCHING. MORE CLARITY.</div>'
-            '<h1>Know your funds.<br><em>Find the facts.</em></h1>'
-            '<p>Clear answers to your questions about five HDFC mutual fund schemes, '
-            'with the sources to explore further.</p></section>',
+            '<section class="hero"><div class="eyebrow">FUND FACTS ASSISTANT</div>'
+            '<h1>A clearer view of<br>your mutual funds.</h1>'
+            '<p>Explore fees, investment minimums, and fund details. '
+            'Get concise answers with sources you can check.</p></section>',
             unsafe_allow_html=True,
         )
     else:
-        st.markdown('<h1 class="conversation-title">Your fund questions, answered.</h1>', unsafe_allow_html=True)
+        st.markdown('<h1 class="conversation-title">Your research</h1>', unsafe_allow_html=True)
     st.markdown(
         f'<div class="disclaimer"><span aria-hidden="true">ⓘ</span> {DISCLAIMER}</div>',
         unsafe_allow_html=True,
     )
+    input_options = {
+        "placeholder": "Ask a question about an HDFC fund…",
+        "max_chars": 1500,
+        "key": "fund_question",
+    }
+    question = None
     if not st.session_state.messages:
-        st.markdown('<div class="section-label">A GOOD PLACE TO START</div>', unsafe_allow_html=True)
+        with st.container(key="welcome_input"):
+            question = st.chat_input(**input_options)
+        st.caption("Include the fund name. Please leave out personal or account details.")
+    if not st.session_state.messages:
+        st.markdown('<div class="section-label">SUGGESTED QUESTIONS</div>', unsafe_allow_html=True)
         selected = render_examples()
-        st.markdown(
-            '<div class="how-it-works"><span><b>01</b> Ask a fund question</span>'
-            '<span><b>02</b> Get a concise answer</span>'
-            '<span><b>03</b> Explore the source</span></div>',
-            unsafe_allow_html=True,
-        )
     else:
         with st.expander("Explore suggested questions"):
             selected = render_examples()
@@ -215,18 +219,9 @@ def main() -> None:
                 st.markdown('<div class="message-label">FUND FACTS</div>', unsafe_allow_html=True)
                 render_assistant_message(message["response"])
 
-    st.caption("Include the fund name in your question. Please leave out personal or account details.")
-    input_options = {
-        "placeholder": "Ask about a fund’s fees, SIP, lock-in, or risk…",
-        "max_chars": 1500,
-        "key": "fund_question",
-    }
     if st.session_state.messages:
+        st.caption("Include the fund name. Please leave out personal or account details.")
         question = st.chat_input(**input_options)
-    else:
-        # An inline welcome input avoids scrolling past the introduction on phones.
-        with st.container(key="welcome_input"):
-            question = st.chat_input(**input_options)
     submitted = question or selected
     if submitted and submitted.strip():
         with st.spinner("Looking through the sources…"):
